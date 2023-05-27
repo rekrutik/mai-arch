@@ -1,5 +1,6 @@
 #include "user/user_repository.h"
 #include "common/db.h"
+#include <algorithm>
 #include <optional>
 
 using Poco::Data::Keywords::into;
@@ -62,7 +63,9 @@ std::vector<User> UserRepository::findUsersByName(std::string name) const {
         if (stmt.rowsExtracted() == 0) {
           break;
         }
-        if (!user.is_deleted) {
+        if (!user.is_deleted &&
+            !std::any_of(users.begin(), users.end(),
+                         [&user](const auto &u) { return u.id == user.id; })) {
           users.push_back(user);
         }
       }
