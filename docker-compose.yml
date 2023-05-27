@@ -1,0 +1,122 @@
+version: '3.3'
+
+services:
+  mariadb0:
+    image: mariadb:latest
+    environment:
+      MYSQL_DATABASE: ${DB_DB}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: 'root'
+    healthcheck:
+      test: "/usr/bin/mysql --database=${DB_DB} --user=${DB_USER} --password=${DB_PASSWORD} --execute \"SHOW DATABASES;\""
+      timeout: 5s
+      retries: 50
+    volumes:
+      - ./mariadb/bootstrap/:/docker-entrypoint-initdb.d
+      - data0:/var/lib/mysql
+  mariadb1:
+    image: mariadb:latest
+    environment:
+      MYSQL_DATABASE: ${DB_DB}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: 'root'
+    healthcheck:
+      test: "/usr/bin/mysql --database=${DB_DB} --user=${DB_USER} --password=${DB_PASSWORD} --execute \"SHOW DATABASES;\""
+      timeout: 5s
+      retries: 50
+    volumes:
+      - ./mariadb/bootstrap/:/docker-entrypoint-initdb.d
+      - data1:/var/lib/mysql
+  mariadb2:
+    image: mariadb:latest
+    environment:
+      MYSQL_DATABASE: ${DB_DB}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: 'root'
+    healthcheck:
+      test: "/usr/bin/mysql --database=${DB_DB} --user=${DB_USER} --password=${DB_PASSWORD} --execute \"SHOW DATABASES;\""
+      timeout: 5s
+      retries: 50
+    volumes:
+      - ./mariadb/bootstrap/:/docker-entrypoint-initdb.d
+      - data2:/var/lib/mysql
+  proxysql:
+    image: proxysql/proxysql:latest
+    environment:
+      MYSQL_DATABASE: ${DB_DB}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: 'root'
+    healthcheck:
+      test: "/usr/bin/mysql --database=${DB_DB} --user=${DB_USER} --password=${DB_PASSWORD} --execute \"SHOW DATABASES;\""
+      timeout: 5s
+      retries: 50
+    volumes:
+      - ./proxysql/proxysql.cnf:/etc/proxysql.cnf
+    depends_on:
+      mariadb0:
+        condition: service_healthy
+      mariadb1:
+        condition: service_healthy
+      mariadb2:
+        condition: service_healthy
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./auth/auth_service
+    environment:
+      DB_HOST: proxysql
+      DB_PORT: 6033
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DB: ${DB_DB}
+      AUTH_TOKEN: zxc
+    ports:
+      - 8000:8000
+    depends_on:
+      proxysql:
+        condition: service_healthy
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./user/user_service
+    environment:
+      DB_HOST: proxysql
+      DB_PORT: 6033
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DB: ${DB_DB}
+      AUTH_TOKEN: zxc
+      AUTH_HOST: http://auth-service:8000
+    ports:
+      - 8001:8001
+    depends_on:
+      proxysql:
+        condition: service_healthy
+  order-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./order/order_service
+    environment:
+      DB_HOST: proxysql
+      DB_PORT: 6033
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DB: ${DB_DB}
+      AUTH_TOKEN: zxc
+      AUTH_HOST: http://auth-service:8000
+    ports:
+      - 8002:8002
+    depends_on:
+      proxysql:
+        condition: service_healthy
+volumes:
+  data0:
+  data1:
+  data2:

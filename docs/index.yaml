@@ -1,0 +1,470 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: "Service order API"
+paths:
+  /auth/v1/sign_up:
+    servers:
+      - url: http://localhost:8000
+    post:
+      summary: Sign up
+      parameters:
+        - name: id
+          description: Account id
+          required: false
+          in: query
+          schema:
+            $ref: "#/components/schemas/account_id"
+        - name: username
+          description: Username
+          required: false
+          in: query
+          schema:
+            $ref: "#/components/schemas/username"
+        - name: password
+          description: Password
+          in: query
+          schema:
+            $ref: "#/components/schemas/password"
+      responses:
+        201:
+          description: Account successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSignUpResponse"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - apiKeyAuth: []
+  /auth/v1/sign_in:
+    servers:
+      - url: http://localhost:8000
+    get:
+      summary: Sign in
+      parameters:
+        - name: username
+          description: Username
+          in: query
+          schema:
+            $ref: "#/components/schemas/username"
+        - name: password
+          description: Password
+          in: query
+          schema:
+            $ref: "#/components/schemas/password"
+      responses:
+        200:
+          description: Session token created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSignInResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /auth/v1/validate:
+    servers:
+      - url: http://localhost:8000
+    get:
+      parameters:
+        - name: token
+          description: Account token
+          in: query
+          schema:
+            $ref: "#/components/schemas/token"
+      summary: Bearer token validation
+      responses:
+        200:
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthValidateResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - apiKeyAuth: []
+  /user/v1/user:
+    servers:
+      - url: http://localhost:8001
+    put:
+      summary: Create user
+      parameters:
+        - name: username
+          description: Username
+          in: query
+          schema:
+            $ref: "#/components/schemas/username"
+        - name: name
+          description: Name
+          in: query
+          schema:
+            $ref: "#/components/schemas/username"
+        - name: password
+          description: Password
+          in: query
+          schema:
+            $ref: "#/components/schemas/password"
+      responses:
+        201:
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPutResponse"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    get:
+      summary: Get user
+      parameters:
+        - name: id
+          description: User id
+          in: query
+          schema:
+            $ref: "#/components/schemas/account_id"
+      responses:
+        200:
+          description: User model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserGetResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete user
+      parameters:
+        - name: id
+          description: User id
+          in: query
+          schema:
+            $ref: "#/components/schemas/account_id"
+      responses:
+        204:
+          description: User successfully deleted
+        403:
+          $ref: "#/components/responses/ForbiddenError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - bearerAuth: []
+  /user/v1/search:
+    servers:
+      - url: http://localhost:8001
+    get:
+      summary: Find user my name mask
+      parameters:
+        - name: name
+          description: Name mask
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: Users found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserFindResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /order/v1/service:
+    servers:
+      - url: http://localhost:8002
+    put:
+      summary: Create service
+      parameters:
+        - name: name
+          description: Service name
+          in: query
+          schema:
+            $ref: "#/components/schemas/service_name"
+        - name: description
+          description: Description
+          in: query
+          schema:
+            $ref: "#/components/schemas/service_description"
+        - name: price
+          description: Price
+          in: query
+          schema:
+            $ref: "#/components/schemas/price"
+      responses:
+        201:
+          description: Service successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServicePutResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - bearerAuth: []
+    get:
+      summary: Get service
+      parameters:
+        - name: id
+          description: Service id
+          in: query
+          schema:
+            $ref: "#/components/schemas/service_id"
+      responses:
+        200:
+          description: Service model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceGetResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - bearerAuth: []
+  /order/v1/service/list:
+    servers:
+      - url: http://localhost:8002
+    get:
+      summary: Get service list
+      responses:
+        200:
+          description: Service models
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceListResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - bearerAuth: []
+  /order/v1/order:
+    servers:
+      - url: http://localhost:8002
+    put:
+      summary: Create order
+      parameters:
+        - name: service_id
+          description: Service id
+          in: query
+          schema:
+            $ref: "#/components/schemas/service_id"
+      responses:
+        201:
+          description: Order successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderPutResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - bearerAuth: []
+  /order/v1/order/list:
+    servers:
+      - url: http://localhost:8002
+    get:
+      summary: Get orders for user
+      responses:
+        200:
+          description: Service models
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+        401:
+          $ref: "#/components/responses/UnauthorizedError"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    username:
+      type: string
+    name:
+      type: string
+    password:
+      type: string
+    account_id:
+      type: integer
+    token:
+      type: string
+    service_id:
+      type: integer
+    service_name:
+      type: string
+    service_description:
+      type: string
+    price:
+      type: integer
+    order_id:
+      type: integer
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - is_admin
+      properties:
+        id:
+          $ref: "#/components/schemas/account_id"
+        name:
+          $ref: "#/components/schemas/name"
+        is_admin:
+          type: boolean
+    Service:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - price
+        - seller_id
+        - created_at
+      properties:
+        id:
+          $ref: "#/components/schemas/service_id"
+        name:
+          $ref: "#/components/schemas/service_name"
+        description:
+          $ref: "#/components/schemas/service_description"
+        price:
+          $ref: "#/components/schemas/price"
+        seller_id:
+          $ref: "#/components/schemas/account_id"
+        created_at:
+          type: integer
+
+    AuthSignUpRequest:
+      description: Model for creating an entity for a sign-in service
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          $ref: "#/components/schemas/username"
+        password:
+          type: string
+    AuthSignUpResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/account_id"
+    AuthSignInResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          $ref: "#/components/schemas/token"
+    AuthValidateResponse:
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+        id:
+          $ref: "#/components/schemas/account_id"
+    UserPutResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          $ref: "#/components/schemas/token"
+    UserGetResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+    ServicePutResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/service_id"
+    ServiceGetResponse:
+      type: object
+      required:
+        - service
+      properties:
+        service:
+          $ref: "#/components/schemas/Service"
+    ServiceListResponse:
+      type: object
+      required:
+        - services
+      properties:
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/Service"
+    OrderPutResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/order_id"
+    OrderListResponse:
+      type: object
+      required:
+        - services
+      properties:
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/Service"
+    UserFindResponse:
+      type: object
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+  responses:
+    UnauthorizedError:
+      description: Session token validation failed or bad user credits
+    ForbiddenError:
+      description: Access forbidden
+    InternalServerError:
+      description: Unexpected internal server exeption
+    NotFoundError:
+      description: Entity not found
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY

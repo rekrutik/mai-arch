@@ -1,0 +1,9 @@
+[requires]
+poco/1.12.4
+fmt/10.0.0
+libmysqlclient/8.0.31
+openssl/1.1.1t
+
+[generators]
+CMakeDeps
+CMakeToolchain
