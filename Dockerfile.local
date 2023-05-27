@@ -21,17 +21,16 @@ RUN DEBIAN_FRONTEND=noninteractive \
 RUN pip3 install conan
 
 WORKDIR /app/
-RUN git clone https://github.com/rekrutik/mai-arch.git
+#RUN git clone https://github.com/rekrutik/mai-arch.git
 
 WORKDIR /app/mai-arch
 
-# COPY ./conan_profile /root/.conan2/profiles/default
-# COPY ./conanfile.txt .
-RUN mkdir -p /root/.conan2/profiles && cp ./conan_profile /root/.conan2/profiles/default
+COPY ./conan_profile /root/.conan2/profiles/default
+COPY ./conanfile.txt .
 RUN update-alternatives --install /usr/bin/cc cc /usr/bin/clang-15 60
 RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-15 60
 RUN conan install . --output-folder=build --build=missing
-# COPY ./ ./
+COPY ./ ./
 WORKDIR /app/mai-arch/build
 RUN cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
 RUN cmake --build .
