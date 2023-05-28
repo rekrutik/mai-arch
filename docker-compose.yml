@@ -51,7 +51,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: 'root'
     healthcheck:
-      test: "/usr/bin/mysql --database=${DB_DB} --user=${DB_USER} --password=${DB_PASSWORD} --execute \"SHOW DATABASES;\""
+      test: "/usr/bin/mysql -h 127.0.0.1 -P 6033 --database=${DB_DB} --user=${DB_USER} --password=${DB_PASSWORD} --execute \"SHOW DATABASES;\""
       timeout: 5s
       retries: 50
     volumes:
